@@ -3,6 +3,7 @@ from accounts.models import User
 from datetime import date, datetime, time
 from autoslug import AutoSlugField
 from django.utils.text import slugify
+from cloudinary.models import CloudinaryField
 
 # import for geos
 from django.contrib.gis.db import models as gismodels
@@ -24,7 +25,12 @@ class FillingStation(models.Model):
     no_of_reviews = models.IntegerField(default=0, blank=True, null=True)
     total_clicks = models.IntegerField(default=0, blank=True, null=True)
     name = models.CharField(blank=True, null=True)
-    station_img = models.ImageField(blank=True, null=True)
+    operation_time = models.CharField(blank=True, null=True)
+    car_wash = models.IntegerField(default=0)
+    pos = models.IntegerField(default=0)
+    car_mechanic = models.IntegerField(default=0)
+    mini_mart = models.IntegerField(default=0)
+    station_img = CloudinaryField(blank=True, null=True)
     address = models.CharField(blank=True, null=True)
     phone = models.CharField(blank=True, null=True)
     station_time = models.CharField(blank=True, null=True)

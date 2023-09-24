@@ -73,7 +73,7 @@ class GetStations(serializers.ModelSerializer):
 
     class Meta:
         model = FillingStation
-        fields = ['license_number', 'petrol_price', 'kerosene_price', 'user', 'is_open', 'created_at',
+        fields = ['license_number', 'petrol_price', 'kerosene_price', 'user', 'is_open', 'created_at', 'longitude', 'latitude',
                   'diesel_price', 'filling_station_slug', 'rating', 'name', 'address', 'phone', 'is_verified']
 
 
@@ -92,5 +92,3 @@ class StatisticsSerializer(serializers.Serializer):
     all_stations = serializers.IntegerField()
     verified_stations = serializers.IntegerField()
     pending_verification_stations = serializers.IntegerField()
-
-    

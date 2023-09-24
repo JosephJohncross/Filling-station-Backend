@@ -15,5 +15,6 @@ urlpatterns = [
     path('get_station/<slug:slug>',
          views.get_stations_by_slug, name="get_stations_by_slug"),
     path('get_statistics', views.get_admin_statistics, name="get_statistics"),
-
+    path('get_station_dashboard_profile/<int:user_id>', views.get_station_dashboard_profile,
+         name="get_station_dashboard_profile"),
 ]

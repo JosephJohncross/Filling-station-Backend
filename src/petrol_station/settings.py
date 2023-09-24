@@ -37,7 +37,8 @@ INSTALLED_APPS = [
     'cloudinary',
     'cloudinary_storage',
     'drf_yasg',
-    'django.contrib.gis'
+    'django.contrib.gis',
+    'review'
 ]
 
 MIDDLEWARE = [

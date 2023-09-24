@@ -10,6 +10,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from .models import User, GeneralUser
 from filling_station.models import FillingStation
+from django.http import JsonResponse
 
 
 # Note --->  General User Role --> 1
@@ -217,14 +218,91 @@ def get_stations_by_slug(request, slug):
 @api_view(['GET'])
 def get_stations(request):
     """Endpoint to get all stations"""
+    station_users = User.objects.filter(role=2)
 
-    all_stations = FillingStation.objects.all()
+    station_profiles = []
+    for user in station_users:
+        all_stations = FillingStation.objects.filter(user=user).first()
+        filling_station_data = {
+            'email': user.email,
+            'license_number': all_stations.license_number,
+            'petrol_price': all_stations.petrol_price,
+            'kerosene_price': all_stations.kerosene_price,
+            'diesel_price': all_stations.diesel_price,
+            'rating': all_stations.rating,
+            'no_of_favorites': all_stations.no_of_favorites,
+            'no_of_reviews': all_stations.no_of_reviews,
+            'total_clicks': all_stations.total_clicks,
+            'name': all_stations.name,
+            # 'station_img': all_stations.station_img,
+            'address': all_stations.address,
+            'phone': all_stations.phone,
+            'is_open': all_stations.is_open,
+            'is_verified': all_stations.is_verified,
+            'longitude': all_stations.longitude,
+            'latitude': all_stations.latitude,
+            # 'location': all_stations.location,
+            'joined': all_stations.created_at,
+            'id': all_stations.id
+        }
 
-    serializer = s.GetStations(all_stations, many=True)
-    return Response(
-        {"stations":  serializer.data},
-        status=status.HTTP_200_OK
-    )
+        station_profiles.append(filling_station_data)
+    response_data = {
+        'stations': station_profiles
+    }
+
+
+@api_view(['GET'])
+def get_station_dashboard_profile(request, user_id):
+    """Endpoint to get all stations"""
+    station_user = User.objects.get(id=user_id)
+    station = FillingStation.objects.get(user_id=user_id)
+
+    filling_station_data = {
+        'email': station_user.email,
+        'license_number': station.license_number,
+        'petrol_price': station.petrol_price,
+        'kerosene_price': station.kerosene_price,
+        'diesel_price': station.diesel_price,
+        'rating': station.rating,
+        'no_of_favorites': station.no_of_favorites,
+        'no_of_reviews': station.no_of_reviews,
+        'total_clicks': station.total_clicks,
+        'name': station.name,
+        # 'station_img': station.station_img,
+        'address': station.address,
+        'phone': station.phone,
+        'is_open': station.is_open,
+        'is_verified': station.is_verified,
+        'longitude': station.longitude,
+        'latitude': station.latitude,
+        # 'location': station.location,
+        'joined': station.created_at,
+        'car_wash': station.car_wash,
+        'pos': station.pos,
+        'car_mechanic': station.car_mechanic,
+        'mini_mart': station.mini_mart,
+        'operation_time': station.operation_time,
+        'id': station.id
+    }
+
+    response_data = {
+        'profile': filling_station_data
+    }
+
+    # serializer = s.GetStations(all_stations, many=True)
+    # return Response(
+    #     {"stations":  serializer.data},
+    #     status=status.HTTP_200_OK
+    # )
+    return JsonResponse(response_data)
+
+    # serializer = s.GetStations(all_stations, many=True)
+    # return Response(
+    #     {"stations":  serializer.data},
+    #     status=status.HTTP_200_OK
+    # )
+    return JsonResponse(response_data)
 
 
 @api_view(['GET'])

@@ -22,4 +22,5 @@ urlpatterns = [
     #App urls
     path('api/accounts/', include('accounts.urls')),
     path('api/station/', include('filling_station.urls')),
+    path('api/review/', include('review.urls')),
 ]
