@@ -92,3 +92,11 @@ class StatisticsSerializer(serializers.Serializer):
     all_stations = serializers.IntegerField()
     verified_stations = serializers.IntegerField()
     pending_verification_stations = serializers.IntegerField()
+
+
+class GeneralUserProfileSerializer(serializers.ModelSerializer):
+    """Serilalizes a general user object"""
+
+    class Meta:
+        model = GeneralUser
+        fields = ['user', 'name', 'phone', 'avatar']

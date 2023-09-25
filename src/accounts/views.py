@@ -302,7 +302,7 @@ def get_station_dashboard_profile(request, user_id):
     #     {"stations":  serializer.data},
     #     status=status.HTTP_200_OK
     # )
-    return JsonResponse(response_data)
+    
 
 
 @api_view(['GET'])
@@ -333,3 +333,50 @@ def get_admin_statistics(request):
             {"error": serializer.errors},
             status=status.HTTP_400_BAD_REQUEST
         )
+
+
+@api_view(['GET'])
+def get_user_profile(request, user_id):
+    """Returns a user profile """
+
+    try:
+        general_user = GeneralUser.objects.get(user_id=user_id)
+    except:
+        return Response(
+            {"error": "User not found"},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    serializer = s.GeneralUserProfileSerializer(general_user)
+
+    return Response(
+        {"user_profile": serializer.data},
+        status=status.HTTP_200_OK
+    )
+
+
+@api_view(['PATCH'])
+def update_user_profile(request):
+    """Updates a general user profile """
+
+    user_id = request.data.get('user')
+    try:
+        user = GeneralUser.objects.get(user=user_id)
+    except:
+        return Response(
+            {'error':  "User does not exist"},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    serializer = s.GeneralUserProfileSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+
+        return Response(
+            {"message": "User profile updated successfully"},
+            status=status.HTTP_200_OK
+        )
+    return Response(
+        {"user_profile": serializer.data},
+        status=status.HTTP_200_OK
+    )

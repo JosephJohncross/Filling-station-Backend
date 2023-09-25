@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import FillingStation
+from .models import FillingStation, FavouriteStation
 
 
 class PetrolProductSerializer(serializers.ModelSerializer):
@@ -39,10 +39,10 @@ class GetStationsByDistanceSerializer(serializers.ModelSerializer):
         # Access the distance attribute from the object and convert it to kilometers
         return obj.distance.km if obj.distance else None
 
-# class GetStationDetailsSerializer(serializers.ModelSerializer):
-#     """Serializes a filling station object with more details"""
 
-#     class Meta:
-#         model  = FillingStation
-#         fields = ['license_number', 'petrol_price', 'kerosene_price', 'user', 'is_open', 'created_at', 'longitude', 'latitude',
-#                   'diesel_price', 'filling_station_slug', 'rating', 'name', 'address', 'phone', 'is_verified', 'distance_km']
+class AddStationToFavoriteSerializer(serializers.ModelSerializer):
+    """serializes a favouriteStation model for creation"""
+
+    class Meta:
+        model = FavouriteStation
+        fields = ['user', 'station']

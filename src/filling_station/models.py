@@ -4,6 +4,7 @@ from datetime import date, datetime, time
 from autoslug import AutoSlugField
 from django.utils.text import slugify
 from cloudinary.models import CloudinaryField
+from accounts.models import GeneralUser
 
 # import for geos
 from django.contrib.gis.db import models as gismodels
@@ -19,7 +20,7 @@ class FillingStation(models.Model):
     petrol_price = models.IntegerField(blank=True, null=True)
     kerosene_price = models.IntegerField(blank=True, null=True)
     diesel_price = models.IntegerField(blank=True, null=True)
-    rating = models.IntegerField(blank=True, null=True)
+    rating = models.FloatField(blank=True, null=True)
     filling_station_slug = AutoSlugField(populate_from=None, unique=True)
     no_of_favorites = models.IntegerField(default=0, blank=True)
     no_of_reviews = models.IntegerField(default=0, blank=True, null=True)
@@ -41,6 +42,8 @@ class FillingStation(models.Model):
     location = gismodels.PointField(blank=True, null=True, srid=4326)
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
+    no_of_user_rating = models.IntegerField(default=0)
+    total_rating = models.FloatField(default=0)
 
     def __str__(self):
         return self.name
@@ -53,57 +56,42 @@ class FillingStation(models.Model):
             self.filling_station_slug = slugify(slug_text)
         return super(FillingStation, self).save(*args, **kwargs)
 
-    def is_opened(self):
-        today_date = date.today()
-        today = today_date.isoweekday()
 
-        current_opening_hours = OpeningHour.objects.filter(
-            filling_station=self, day=today)
-        now = datetime.now()
-        current_time = now.strftime("%H:%M:%S")
+# DAYS = [
+#     (1, ("Monday")),
+#     (2, ("Tuesday")),
+#     (3, ("Wednesday")),
+#     (4, ("Thursday")),
+#     (5, ("Friday")),
+#     (6, ("Saturday")),
+#     (7, ("Sunday"))
+# ]
 
-        is_open = None
-        for i in current_opening_hours:
-            start = str(datetime.strptime(i.from_hour, "%I:%M %p").time())
-            end = str(datetime.strptime(i.to_hour, "%I:%M %p").time())
-
-            if current_time > start and current_time < end:
-                is_open = True
-            else:
-                is_open = False
-
-        return is_open
+# HOUR_OF_DAY_24 = [(time(h, m).strftime('%I:%M %p'), time(
+#     h, m).strftime('%I:%M %p')) for h in range(0, 24) for m in (0, 30)]
 
 
-DAYS = [
-    (1, ("Monday")),
-    (2, ("Tuesday")),
-    (3, ("Wednesday")),
-    (4, ("Thursday")),
-    (5, ("Friday")),
-    (6, ("Saturday")),
-    (7, ("Sunday"))
-]
+# class OpeningHour(models.Model):
+#     """Model for station operating time"""
 
-HOUR_OF_DAY_24 = [(time(h, m).strftime('%I:%M %p'), time(
-    h, m).strftime('%I:%M %p')) for h in range(0, 24) for m in (0, 30)]
+#     filling_station = models.ForeignKey(
+#         FillingStation, on_delete=models.CASCADE)
+#     day = models.IntegerField(choices=DAYS)
+#     from_hour = models.CharField(
+#         choices=HOUR_OF_DAY_24, max_length=10, blank=True)
+#     to_hour = models.CharField(
+#         choices=HOUR_OF_DAY_24, max_length=10, blank=True)
+#     is_closed = models.BooleanField(default=False, blank=True)
 
+#     class Meta:
+#         ordering = ('day', '-from_hour')
+#         unique_together = ('filling_station', 'day', 'from_hour', 'to_hour')
 
-class OpeningHour(models.Model):
-    """Model for station operating time"""
+#     def __str__(self):
+#         return self.get_day_display()
 
-    filling_station = models.ForeignKey(
-        FillingStation, on_delete=models.CASCADE)
-    day = models.IntegerField(choices=DAYS)
-    from_hour = models.CharField(
-        choices=HOUR_OF_DAY_24, max_length=10, blank=True)
-    to_hour = models.CharField(
-        choices=HOUR_OF_DAY_24, max_length=10, blank=True)
-    is_closed = models.BooleanField(default=False, blank=True)
+class FavouriteStation(models.Model):
+    """model for user favorite stations"""
 
-    class Meta:
-        ordering = ('day', '-from_hour')
-        unique_together = ('filling_station', 'day', 'from_hour', 'to_hour')
-
-    def __str__(self):
-        return self.get_day_display()
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    station = models.ManyToManyField(FillingStation)
