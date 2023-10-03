@@ -23,7 +23,7 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = FillingStation
-        fields = ['name', 'operation_time', 'phone']
+        fields = ['name', 'operation_time', 'phone' ,'address']
 
 
 class GetStationsByDistanceSerializer(serializers.ModelSerializer):

@@ -17,5 +17,7 @@ urlpatterns = [
     path('get_favourite_station/<int:user_id>', views.get_favourite_station,
          name='get_favourite_station'),
     path('remove_station_from_favourite/<int:station>/<int:user>', views.remove_favourite,
-         name='remove_station_from_favourite')
+         name='remove_station_from_favourite'),
+    path('verify_station/<int:id>', views.verify_station, name='verify_station'),
+    path('update_station_img', views.update_station_img, name='update_station_img'),
 ]

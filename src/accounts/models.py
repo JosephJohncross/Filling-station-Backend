@@ -63,14 +63,14 @@ class GeneralUser(models.Model):
 
     user = models.ForeignKey(
         User, on_delete=models.CASCADE)
-    name = models.CharField(blank=True, null=True)
+    username = models.CharField(blank=True, null=True)
     phone = models.CharField(blank=True, null=True)
     avatar = models.CharField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
     modified_at = models.DateTimeField(auto_now=True, blank=True, null=True)
 
     def __str__(self):
-        return self.name
+        return str(self.user)
     # general_user = models.OneToOneField(
     #     User, on_delete=models.CASCADE, primary_key=True)
     # favorite=models.ForeignKey(FillingStation, on_delete=models.CASCADE)

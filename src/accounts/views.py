@@ -38,12 +38,26 @@ def get_users(request):
     """Returns all registered users"""
 
     all_users = GeneralUser.objects.all()
-    serializer = s.GetUserSerializer(all_users, many=True)
+    # serializer = s.GetUserSerializer(all_users, many=True)
 
-    return Response(
-        serializer.data,
-        status=status.HTTP_200_OK
-    )
+    all_users_profile = []
+
+    for user in all_users:
+        user_core = User.objects.get(id=user.user_id)
+
+        user_data = {
+            'email': user_core.email,
+            'phone': user.phone,
+            'username': user.username,
+            'created_at': user.created_at,
+        }
+
+        all_users_profile.append(user_data)
+    data = {
+        'users': all_users_profile
+    }
+
+    return JsonResponse(data)
 
 
 @api_view(["GET"])
@@ -78,7 +92,7 @@ def create_general_user(request):
 def update_general_user(request):
     """Endpoint for updating a normal day to nday user"""
 
-    user_id = request.data.get("id")
+    user_id = request.data.get("user")
 
     try:
         user = GeneralUser.objects.get(user=user_id)
@@ -178,9 +192,6 @@ def update_station(request):
 
     serializer = s.UpdateStation(user, data=request.data)
     if serializer.is_valid():
-        print(f"Petrol price: {serializer.validated_data['petrol_price']}")
-        print(f"Kerosene: {serializer.validated_data['kerosene_price']}")
-        print(f"Diesel: {serializer.validated_data['diesel_price']}")
         serializer.save()
 
         return Response(
@@ -243,13 +254,16 @@ def get_stations(request):
             'latitude': all_stations.latitude,
             # 'location': all_stations.location,
             'joined': all_stations.created_at,
-            'id': all_stations.id
+            'id': all_stations.id,
+            'user': all_stations.user_id
         }
 
         station_profiles.append(filling_station_data)
     response_data = {
         'stations': station_profiles
     }
+
+    return JsonResponse(response_data)
 
 
 @api_view(['GET'])
@@ -302,7 +316,6 @@ def get_station_dashboard_profile(request, user_id):
     #     {"stations":  serializer.data},
     #     status=status.HTTP_200_OK
     # )
-    
 
 
 @api_view(['GET'])
@@ -312,11 +325,13 @@ def get_admin_statistics(request):
     all_stations = FillingStation.objects.all().count()
     verified_stations = FillingStation.objects.filter(is_verified=True).count()
     pending_stations = FillingStation.objects.filter(is_verified=False).count()
+    all_users = GeneralUser.objects.all().count()
 
     data = {
         'all_stations': all_stations,
         'verified_stations': verified_stations,
-        'pending_verification_stations': pending_stations
+        'pending_verification_stations': pending_stations,
+        'all_users': all_users
     }
 
     serializer = s.StatisticsSerializer(data=data)
@@ -360,6 +375,7 @@ def update_user_profile(request):
     """Updates a general user profile """
 
     user_id = request.data.get('user')
+    print(user_id)
     try:
         user = GeneralUser.objects.get(user=user_id)
     except:
@@ -380,3 +396,6 @@ def update_user_profile(request):
         {"user_profile": serializer.data},
         status=status.HTTP_200_OK
     )
+
+
+# @api_view(['PATCH'])

@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, parser_classes
 from .models import FillingStation, FavouriteStation
 from rest_framework.response import Response
 from rest_framework import status
@@ -7,6 +7,9 @@ from . import serializers
 from django.contrib.gis.geos import Point
 from django.contrib.gis.db.models.functions import Distance
 from django.http import JsonResponse
+from accounts.models import User
+from cloudinary.uploader import upload
+from rest_framework.parsers import FileUploadParser
 
 
 @api_view(['PATCH'])
@@ -203,6 +206,7 @@ def add_station_to_favorite(request):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
+
 @api_view(['GET'])
 def get_favourite_station(request, user_id):
     """Returns all favourite stations added by the user"""
@@ -237,6 +241,7 @@ def get_favourite_station(request, user_id):
 
     return JsonResponse({"favourite": my_favourite})
 
+
 @api_view(['DELETE'])
 def remove_favourite(request, station, user):
     """Deletes a favourite from a user favourite list"""
@@ -254,3 +259,50 @@ def remove_favourite(request, station, user):
         {"message": "Station removed from favourtites"},
         status=status.HTTP_204_NO_CONTENT
     )
+
+
+@api_view(['PATCH'])
+def verify_station(request, id):
+    """Set station verification statues"""
+
+    try:
+        user = FillingStation.objects.get(user=id)
+        print(user)
+    except User.DoesNotExist:
+        return Response(
+            {"error": "User does not exist"},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    user.is_verified = True
+    user.save()
+
+    return Response(
+        {"message": "Station verified"},
+        status=status.HTTP_200_OK
+    )
+
+
+@api_view(['PATCH'])
+@parser_classes([FileUploadParser])
+def update_station_img(request):
+    """Updates to station image"""
+
+    station_id = request.data.get('station_id')
+    if request.method == 'PATCH' and 'image' in request.data:
+        image = request.data['image']
+
+    try:
+        station = FillingStation.objects.get(id=station_id)
+
+        response = upload(image)
+        cloudinary_url = response['secure_url']
+        station.station_img = cloudinary_url
+        return Response({
+            "message": "Image upload successful"
+        })
+    except FillingStation.DoesNotExist:
+        return Response(
+            {"error": "station does not exist"},
+            status=status.HTTP_404_NOT_FOUND
+        )

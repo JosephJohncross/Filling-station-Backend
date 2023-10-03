@@ -6,10 +6,12 @@ from django.contrib.auth.hashers import make_password
 
 class CreateUserSerializer(serializers.ModelSerializer):
     """Serializer for creation of a user"""
+    username = serializers.CharField()
+    phone_number = serializers.CharField()
 
     class Meta:
         model = User
-        fields = ['email', 'password']
+        fields = ['email', 'password', 'phone_number', 'username']
         extra_kwargs = {
             # Make sure password is write-only
             'password': {'write_only': True}
@@ -18,8 +20,16 @@ class CreateUserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         # Hash the password before saving the user
         validated_data['password'] = make_password(validated_data['password'])
+        phone = validated_data.pop('phone_number')
+        username = validated_data.pop('username')
 
-        return super().create(validated_data)
+        user = User.objects.create(**validated_data)
+        GeneralUser.objects.create(
+            phone=phone, user=user, username=username
+        )
+
+        return user
+        # return super().create(validated_data)
 
 
 class CreateFillingStation(serializers.ModelSerializer):
@@ -28,11 +38,12 @@ class CreateFillingStation(serializers.ModelSerializer):
     longitude = serializers.CharField(max_length=20)
     license_number = serializers.CharField(max_length=20)
     name = serializers.CharField()
+    phone_number = serializers.CharField()
 
     class Meta:
         model = User
         fields = ['email', 'password', 'license_number',
-                  'name', 'longitude', 'latitude']
+                  'name', 'longitude', 'latitude', 'phone_number']
         extra_kwargs = {
             # Make sure password is write-only
             'password': {'write_only': True}
@@ -44,10 +55,11 @@ class CreateFillingStation(serializers.ModelSerializer):
         longitude = validated_data.pop('longitude')
         latitude = validated_data.pop('latitude')
         license_number = validated_data.pop('license_number')
+        phone_number = validated_data.pop('phone_number')
         validated_data['password'] = make_password(validated_data['password'])
         user = User.objects.create(**validated_data)
         FillingStation.objects.create(
-            user=user, name=name, license_number=license_number, longitude=longitude, latitude=latitude)
+            user=user, name=name, license_number=license_number, longitude=longitude, latitude=latitude, phone=phone_number)
 
         return user
 
@@ -57,7 +69,7 @@ class UpdateUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = GeneralUser
-        fields = ['name', 'phone', 'avatar']
+        fields = ['phone', 'avatar', 'username']
 
 
 class GetUserSerializer(serializers.ModelSerializer):
@@ -65,7 +77,7 @@ class GetUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = GeneralUser
-        fields = ['name', 'created_at', 'phone', 'user']
+        fields = ['username', 'created_at', 'phone', 'user']
 
 
 class GetStations(serializers.ModelSerializer):
@@ -92,6 +104,7 @@ class StatisticsSerializer(serializers.Serializer):
     all_stations = serializers.IntegerField()
     verified_stations = serializers.IntegerField()
     pending_verification_stations = serializers.IntegerField()
+    all_users = serializers.IntegerField()
 
 
 class GeneralUserProfileSerializer(serializers.ModelSerializer):
@@ -99,4 +112,4 @@ class GeneralUserProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = GeneralUser
-        fields = ['user', 'name', 'phone', 'avatar']
+        fields = ['user', 'username', 'phone', 'avatar']

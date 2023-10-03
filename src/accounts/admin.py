@@ -1,6 +1,7 @@
 from django.contrib import admin
 from .models import GeneralUser, User
 
+
 class UserAdmin(admin.ModelAdmin):
     """"""
     list_display = ('email', 'is_active', 'role')
