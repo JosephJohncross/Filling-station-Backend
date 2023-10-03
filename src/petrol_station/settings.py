@@ -2,6 +2,7 @@ from pathlib import Path
 from decouple import config
 from datetime import timedelta
 import os
+# import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -90,6 +91,10 @@ DATABASES = {
         "USER": config('DB_USER'),
     }
 }
+# This works locally
+# DATABASES = {'default': ""}
+# DATABASES['default'] = dj_database_url.parse(config('DB_CONNECTION_STRING'), conn_max_age=600)
+
 
 
 # Password validation
