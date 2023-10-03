@@ -20,4 +20,6 @@ urlpatterns = [
          name='remove_station_from_favourite'),
     path('verify_station/<int:id>', views.verify_station, name='verify_station'),
     path('update_station_img', views.update_station_img, name='update_station_img'),
+    path('search_for_station',
+         views.user_station_search, name="search_for_station")
 ]

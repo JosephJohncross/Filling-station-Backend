@@ -37,7 +37,10 @@ class GetStationsByDistanceSerializer(serializers.ModelSerializer):
 
     def get_distance_km(self, obj):
         # Access the distance attribute from the object and convert it to kilometers
-        return obj.distance.km if obj.distance else None
+        # return obj.distance.km if obj.distance else None
+        if hasattr(obj, 'distance'):
+            return obj.distance.km
+        return None
 
 
 class AddStationToFavoriteSerializer(serializers.ModelSerializer):

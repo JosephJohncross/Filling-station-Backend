@@ -10,6 +10,9 @@ from django.http import JsonResponse
 from accounts.models import User
 from cloudinary.uploader import upload
 from rest_framework.parsers import FileUploadParser
+from django.db.models import Q
+from django.db.models import F, ExpressionWrapper, FloatField
+from django.db.models.functions import ACos, Cos, Radians, Sin
 
 
 @api_view(['PATCH'])
@@ -306,3 +309,42 @@ def update_station_img(request):
             {"error": "station does not exist"},
             status=status.HTTP_404_NOT_FOUND
         )
+
+
+@api_view(['GET'])
+def user_station_search(request):
+    """Search functionality for login users"""
+
+    search_term = request.query_params.get('search_term', '')
+    latitude = float(request.query_params.get('latitude', 0))
+    longitude = float(request.query_params.get('longitude', 0))
+
+    search_result = FillingStation.objects.filter(
+        Q(address__icontains=search_term) | Q(name__icontains=search_term))
+
+    # # Calculate distance using Haversine formula
+    # distance_expression = ExpressionWrapper(
+    #     6371.0 * ACos(
+    #         Cos(Radians(latitude)) * Cos(Radians(F('latitude'))) *
+    #         Cos(Radians(F('longitude')) - Radians(longitude)) +
+    #         Sin(Radians(latitude)) * Sin(Radians(F('latitude')))
+    #     ),
+    #     output_field=FloatField()
+    # )
+
+    # queryset = search_result.extra(select={'distance': distance_expression})
+    # sett = search_result.extra(select={'distance', ''})
+    # print(str(sett.query))
+
+    serializer = serializers.GetStationsByDistanceSerializer(
+        search_result, many=True)
+    # if serializer.is_valid():
+    return Response(
+        {"search_result":  serializer.data},
+        status=status.HTTP_200_OK
+    )
+    # else:
+    #     return Response(
+    #         {"errror": serializer.errors},
+    #         status=status.HTTP_400_BAD_REQUEST
+    #     )
